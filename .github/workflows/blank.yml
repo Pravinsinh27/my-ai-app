@@ -1,4 +1,4 @@
-name: Unzip and Build APK (Fixed)
+name: Build APK - Final Attempt
 
 on:
   push:
@@ -12,19 +12,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Unzip project files
+      - name: Unzip project
         run: |
           unzip mc-assets.zip
           if [ -d "mc-assets" ]; then mv mc-assets/* .; fi
 
-      - name: Patch Project (Remove Google Services Requirement)
+      - name: Strip Google Services (Fix Error)
         run: |
-          # This removes the Google Services plugin that is causing the error
-          sed -i '/com.google.gms.google-services/d' app/build.gradle.kts || true
+          # 1. Remove the plugin from the app-level build file
+          sed -i '/google-services/d' app/build.gradle.kts || true
+          sed -i '/gms/d' app/build.gradle.kts || true
+          
+          # 2. Remove the plugin from the project-level build file
           sed -i '/google-services/d' build.gradle.kts || true
           
-          # Create a dummy google-services.json just in case the code still looks for it
-          echo '{"project_info":{"project_number":"1","project_id":"id"},"client":[{"client_info":{"mobilesdk_app_id":"1:1:android:1","android_client_info":{"package_name":"'$(grep -r "namespace" app/build.gradle.kts | awk -F'"' '{print $2}')'"}},"api_key":[{"current_key":"key"}]}]}' > app/google-services.json
+          # 3. Create a valid dummy file with your EXACT package name
+          mkdir -p app
+          echo '{
+            "project_info": {"project_number": "1", "project_id": "dummy"},
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:1:android:1",
+                  "android_client_info": {"package_name": "com.aistudio.mcassets.bxgvqy"}
+                },
+                "api_key": [{"current_key": "dummy"}]
+              }
+            ],
+            "configuration_version": "1"
+          }' > app/google-services.json
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -33,16 +49,13 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew || true
-
-      - name: Build with Gradle
-        # Using --no-daemon and -P helps avoid the "AWT/NullPointer" error
+      - name: Build APK
         run: |
+          chmod +x gradlew || true
           if [ -f "gradlew" ]; then
-            ./gradlew assembleDebug --no-daemon -x test
+            ./gradlew assembleDebug --no-daemon
           else
-            gradle assembleDebug --no-daemon -x test
+            gradle assembleDebug --no-daemon
           fi
 
       - name: Upload APK
