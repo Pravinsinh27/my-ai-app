@@ -1,4 +1,4 @@
-name: Build APK - Final Pro Fix
+name: Build APK - App ID and Ad Fix
 
 on:
   push:
@@ -15,30 +15,28 @@ jobs:
       - name: Unzip project
         run: |
           unzip -o mc-assets.zip
-          # If files are inside a folder, move them out
           if [ -d "mc-assets" ]; then mv mc-assets/* .; fi
 
-      - name: Global Ad ID Replacement (Everywhere)
+      - name: Global Ad ID Replacement
         run: |
-          # YOUR REWARD AD ID
-          REAL_ID="ca-app-pub-3303988035586005/9477951640"
+          # 1. YOUR REWARD AD UNIT ID (The one with the /)
+          REAL_UNIT_ID="ca-app-pub-3303988035586005/9477951640"
           
-          # This finds ANY Ad ID pattern in ANY file (HTML, JS, XML, Java) 
-          # and replaces it with your real Reward Ad ID.
-          find . -type f -exec sed -i -E "s|ca-app-pub-[0-9]{16}/[0-9]{10}|$REAL_ID|g" {} +
+          # 2. YOUR APP ID (The one with the ~)
+          REAL_APP_ID="ca-app-pub-3303988035586005~3862662889"
+          
+          # Replace the Ad Unit ID in all files
+          find . -type f -exec sed -i -E "s|ca-app-pub-[0-9]{16}/[0-9]{10}|$REAL_UNIT_ID|g" {} +
+          
+          # Replace the App ID in the AndroidManifest.xml (This is the most important fix)
+          find . -name "AndroidManifest.xml" -exec sed -i -E "s|ca-app-pub-[0-9]{16}~[0-9]{10}|$REAL_APP_ID|g" {} +
 
-      - name: Fix App Icon (Delete Orange Background)
+      - name: Fix App Icon
         run: |
-          # 1. Delete ALL existing launcher icons (XML, PNG, WEBP) to clear the orange background
           find . -name "ic_launcher*" -delete
-          
-          # 2. Force your 'my_logo.png' into the project with the correct name
-          # We place it in the 'drawable' folder which is a high priority for Android
           mkdir -p app/src/main/res/drawable
           cp my_logo.png app/src/main/res/drawable/ic_launcher.png
           cp my_logo.png app/src/main/res/drawable/ic_launcher_round.png
-          
-          # 3. Update the AndroidManifest to stop looking for XML icons and use our PNG
           find . -name "AndroidManifest.xml" -exec sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/ic_launcher"|g' {} +
           find . -name "AndroidManifest.xml" -exec sed -i 's|android:roundIcon="@mipmap/ic_launcher_round"|android:roundIcon="@drawable/ic_launcher_round"|g' {} +
 
