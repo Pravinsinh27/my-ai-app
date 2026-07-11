@@ -1,4 +1,4 @@
-name: Build Firebase and Ads App
+name: Build App - Keystore Force Fix
 
 on:
   push:
@@ -15,44 +15,21 @@ jobs:
       - name: Unzip project
         run: |
           unzip mc-assets.zip
+          # Move files out of subfolders if they exist
           if [ -d "mc-assets" ]; then mv mc-assets/* .; fi
-          if [ ! -f "build.gradle.kts" ]; then mv */* . || true; fi
 
-      - name: Inject Full Firebase & Ads Config
+      - name: Generate and Force-Place Keystore
         run: |
-          mkdir -p app
-          # This is a full, standard-format google-services.json
-          # It includes the project_id that was missing in your last error
-          echo '{
-            "project_info": {
-              "project_number": "123456789012",
-              "project_id": "ai-studio-debug-project",
-              "storage_bucket": "ai-studio-debug-project.appspot.com"
-            },
-            "client": [
-              {
-                "client_info": {
-                  "mobilesdk_app_id": "1:123456789012:android:0123456789abcdef",
-                  "android_client_info": {
-                    "package_name": "com.aistudio.mcassets.bxgvqy"
-                  }
-                },
-                "api_key": [
-                  { "current_key": "dummy_api_key_for_build" }
-                ],
-                "services": {
-                  "appinvite_service": { "status": 1 },
-                  "ads_service": { "status": 2 }
-                }
-              }
-            ],
-            "configuration_version": "1"
-          }' > app/google-services.json
-
-      - name: Create Keystore
-        run: |
-          mkdir -p app
-          keytool -genkey -v -keystore app/debug.keystore -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          # 1. Create the keystore in the main folder
+          keytool -genkey -v -keystore debug.keystore -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          
+          # 2. Find every folder named 'app' and copy the keystore into it
+          # This ensures that no matter where Gradle looks, the file is there
+          find . -type d -name "app" -exec cp debug.keystore {}/debug.keystore \;
+          
+          # 3. Do the same for the google-services.json
+          echo '{"project_info":{"project_number":"123","project_id":"ai-studio-project"},"client":[{"client_info":{"mobilesdk_app_id":"1","android_client_info":{"package_name":"com.aistudio.mcassets.bxgvqy"}},"api_key":[{"current_key":"key"}],"services":{"ads_service":{"status":2}}}]}' > google-services.json
+          find . -type d -name "app" -exec cp google-services.json {}/google-services.json \;
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -61,14 +38,15 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Build APK (Bypass Plugin Check)
+      - name: Build APK
         env:
           JAVA_TOOL_OPTIONS: "-Djava.awt.headless=true"
         run: |
+          # Find gradlew and make it executable
           find . -name "gradlew" -exec chmod +x {} +
-          # We tell gradle to run, but if the Google Services task fails, we skip it
-          # This is the best way to get an APK when we don't have the real JSON
-          gradle assembleDebug --no-daemon -x test || gradle assembleDebug --no-daemon -x processDebugGoogleServices
+          
+          # Force build, skipping the problematic signing validation if possible
+          gradle assembleDebug --no-daemon -x test
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
