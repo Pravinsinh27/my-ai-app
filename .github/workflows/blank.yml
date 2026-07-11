@@ -1,4 +1,4 @@
-name: Build APK - Final Attempt
+name: Build APK - Fix Gradle Block
 
 on:
   push:
@@ -15,32 +15,24 @@ jobs:
       - name: Unzip project
         run: |
           unzip mc-assets.zip
+          # If the zip created a subfolder, move everything to the root
           if [ -d "mc-assets" ]; then mv mc-assets/* .; fi
+          # Sometimes there is another level of folders
+          if [ ! -f "build.gradle.kts" ]; then mv */* . || true; fi
 
-      - name: Strip Google Services (Fix Error)
+      - name: Patch build files (Aggressive)
         run: |
-          # 1. Remove the plugin from the app-level build file
-          sed -i '/google-services/d' app/build.gradle.kts || true
-          sed -i '/gms/d' app/build.gradle.kts || true
+          # 1. Remove the entire googleServices configuration block that causes the error
+          # This looks for the block starting with googleServices and deletes until the closing }
+          sed -i '/googleServices {/,/}/d' app/build.gradle.kts || true
           
-          # 2. Remove the plugin from the project-level build file
-          sed -i '/google-services/d' build.gradle.kts || true
+          # 2. Remove any other mentions of Google Services or Plugins
+          sed -i '/id("com.google.gms.google-services")/d' app/build.gradle.kts || true
+          sed -i '/MissingGoogleServicesStrategy/d' app/build.gradle.kts || true
           
-          # 3. Create a valid dummy file with your EXACT package name
+          # 3. Create the dummy file again just in case
           mkdir -p app
-          echo '{
-            "project_info": {"project_number": "1", "project_id": "dummy"},
-            "client": [
-              {
-                "client_info": {
-                  "mobilesdk_app_id": "1:1:android:1",
-                  "android_client_info": {"package_name": "com.aistudio.mcassets.bxgvqy"}
-                },
-                "api_key": [{"current_key": "dummy"}]
-              }
-            ],
-            "configuration_version": "1"
-          }' > app/google-services.json
+          echo '{"project_info":{"project_number":"1"},"client":[{"client_info":{"mobilesdk_app_id":"1","android_client_info":{"package_name":"com.aistudio.mcassets.bxgvqy"}}}]}' > app/google-services.json
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -51,15 +43,14 @@ jobs:
 
       - name: Build APK
         run: |
-          chmod +x gradlew || true
-          if [ -f "gradlew" ]; then
-            ./gradlew assembleDebug --no-daemon
-          else
-            gradle assembleDebug --no-daemon
-          fi
+          # Ensure gradlew is executable if it exists
+          find . -name "gradlew" -exec chmod +x {} +
+          
+          # Use the system gradle since the local wrapper is acting up
+          gradle assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: my-app-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: "**/build/outputs/apk/debug/*.apk"
