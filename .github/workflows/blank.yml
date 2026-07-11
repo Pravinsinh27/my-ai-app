@@ -1,4 +1,4 @@
-name: Build APK - Final Icon and Reward Ads
+name: Build APK - Brute Force Icon and Ads
 
 on:
   push:
@@ -17,30 +17,26 @@ jobs:
           unzip mc-assets.zip
           if [ -d "mc-assets" ]; then mv mc-assets/* .; fi
 
-      - name: Replace App Logo (Global Force)
+      - name: Brute Force Logo Replacement
         run: |
-          # Delete all existing icons (XML and PNG) to clear the way
-          find app/src/main/res -name "ic_launcher*" -delete
+          # 1. Delete all XML icons (they override PNGs)
+          find . -name "ic_launcher*.xml" -delete
           
-          # Force your logo into every drawable and mipmap folder
+          # 2. Find every image in the 'res' folder and replace it with your logo
+          # This forces your logo to appear even if the app uses a different name
           if [ -f "my_logo.png" ]; then
-            mkdir -p app/src/main/res/drawable
-            cp my_logo.png app/src/main/res/drawable/ic_launcher.png
-            cp my_logo.png app/src/main/res/drawable/ic_launcher_round.png
-            for dir in app/src/main/res/mipmap-*; do
-              cp my_logo.png "$dir/ic_launcher.png"
-              cp my_logo.png "$dir/ic_launcher_round.png"
-            done
+            find app/src/main/res -name "*.png" -exec cp my_logo.png {} \;
+            find app/src/main/res -name "*.webp" -exec cp my_logo.png {} \;
           fi
 
-      - name: Replace Ad Unit ID (Global Pattern Match)
+      - name: Global Ad ID Replacement (Everywhere)
         run: |
           # YOUR REWARD AD ID
           REAL_ID="ca-app-pub-3303988035586005/9477951640"
           
-          # This finds ANY string starting with 'ca-app-pub-' and ending with numbers/slashes
-          # and replaces it with your real Reward ID.
-          find . -type f \( -name "*.xml" -o -name "*.kt" -o -name "*.java" -o -name "*.html" -o -name "*.js" \) -exec sed -i -E "s|ca-app-pub-[0-9]{16}/[0-9]{10}|$REAL_ID|g" {} +
+          # This searches EVERY file in the project for anything looking like a Google Ad ID
+          # and replaces it with your real one.
+          find . -type f -exec sed -i -E "s|ca-app-pub-[0-9]{16}/[0-9]{10}|$REAL_ID|g" {} +
 
       - name: Create Keystore & Config
         run: |
@@ -56,7 +52,7 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Build Final APK
+      - name: Build APK
         env:
           JAVA_TOOL_OPTIONS: "-Djava.awt.headless=true"
         run: |
