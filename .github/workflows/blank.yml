@@ -20,7 +20,7 @@ jobs:
       - name: Global Ad ID Replacement
         run: |
           # 1. YOUR REWARD AD UNIT ID (The one with the /)
-          REAL_UNIT_ID="ca-app-pub-3303988035586005/9477951640"
+          REAL_UNIT_ID="ca-app-pub-3940256099942544/5224354917"
           
           # 2. YOUR APP ID (The one with the ~)
           REAL_APP_ID="ca-app-pub-3303988035586005~3862662889"
