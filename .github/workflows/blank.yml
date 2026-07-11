@@ -1,4 +1,4 @@
-name: Build APK - Fix Gradle Block
+name: Build APK - Nuclear Fix
 
 on:
   push:
@@ -15,24 +15,20 @@ jobs:
       - name: Unzip project
         run: |
           unzip mc-assets.zip
-          # If the zip created a subfolder, move everything to the root
           if [ -d "mc-assets" ]; then mv mc-assets/* .; fi
-          # Sometimes there is another level of folders
           if [ ! -f "build.gradle.kts" ]; then mv */* . || true; fi
 
-      - name: Patch build files (Aggressive)
+      - name: Nuclear Patch (Remove Google Services Completely)
         run: |
-          # 1. Remove the entire googleServices configuration block that causes the error
-          # This looks for the block starting with googleServices and deletes until the closing }
-          sed -i '/googleServices {/,/}/d' app/build.gradle.kts || true
+          # 1. Search every .kts file and delete any line containing 'google-services' or 'gms'
+          find . -name "*.kts" -exec sed -i '/google-services/d' {} +
+          find . -name "*.kts" -exec sed -i '/gms/d' {} +
           
-          # 2. Remove any other mentions of Google Services or Plugins
-          sed -i '/id("com.google.gms.google-services")/d' app/build.gradle.kts || true
-          sed -i '/MissingGoogleServicesStrategy/d' app/build.gradle.kts || true
+          # 2. Delete the specific configuration block that caused the previous error
+          find . -name "build.gradle.kts" -exec sed -i '/googleServices {/,/}/d' {} +
           
-          # 3. Create the dummy file again just in case
-          mkdir -p app
-          echo '{"project_info":{"project_number":"1"},"client":[{"client_info":{"mobilesdk_app_id":"1","android_client_info":{"package_name":"com.aistudio.mcassets.bxgvqy"}}}]}' > app/google-services.json
+          # 3. Delete any physical google-services.json files that might be confusing the build
+          find . -name "google-services.json" -delete
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -43,11 +39,9 @@ jobs:
 
       - name: Build APK
         run: |
-          # Ensure gradlew is executable if it exists
           find . -name "gradlew" -exec chmod +x {} +
-          
-          # Use the system gradle since the local wrapper is acting up
-          gradle assembleDebug --no-daemon
+          # Running with -x means "exclude". We are forcing it to skip the Google Services task.
+          gradle assembleDebug --no-daemon -x processDebugGoogleServices
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
