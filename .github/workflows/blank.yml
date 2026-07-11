@@ -1,4 +1,4 @@
-name: Build APK - Real Ads and Logo (Fixed)
+name: Build APK - Fix Logo and Real Ads
 
 on:
   push:
@@ -17,23 +17,30 @@ jobs:
           unzip mc-assets.zip
           if [ -d "mc-assets" ]; then mv mc-assets/* .; fi
 
-      - name: Replace Ad IDs (Real Ads)
+      - name: Replace App Logo (Forcing PNG)
         run: |
-          # Paste your REAL AD ID below (keep the quote marks)
+          # 1. Delete all XML icons that "hide" our PNG
+          find app/src/main/res -name "ic_launcher*.xml" -delete
+          find app/src/main/res -name "ic_launcher_foreground.xml" -delete
+          find app/src/main/res -name "ic_launcher_background.xml" -delete
+          
+          # 2. Force our PNG into every mipmap folder
+          if [ -f "my_logo.png" ]; then
+            for dir in app/src/main/res/mipmap-*; do
+              cp my_logo.png "$dir/ic_launcher.png"
+              cp my_logo.png "$dir/ic_launcher_round.png"
+            done
+          fi
+
+      - name: Replace All Test Ad IDs (Real Ads)
+        run: |
+          # REPLACE THIS WITH YOUR REAL AD UNIT ID
           REAL_AD_ID="ca-app-pub-3303988035586005/9477951640"
           
-          # We use '|' as a separator instead of '/' to avoid the error
+          # This replaces Banner, Interstitial, and Rewarded test IDs
           find . -type f \( -name "*.xml" -o -name "*.kt" -o -name "*.java" \) -exec sed -i "s|ca-app-pub-3940256099942544/6300978111|$REAL_AD_ID|g" {} +
-
-      - name: Replace App Logo
-        run: |
-          # Ensure you uploaded 'my_logo.png' to your GitHub repo
-          if [ -f "my_logo.png" ]; then
-            find app/src/main/res -name "ic_launcher.png" -exec cp my_logo.png {} \;
-            find app/src/main/res -name "ic_launcher_round.png" -exec cp my_logo.png {} \;
-          else
-            echo "Logo file not found, skipping logo replacement"
-          fi
+          find . -type f \( -name "*.xml" -o -name "*.kt" -o -name "*.java" \) -exec sed -i "s|ca-app-pub-3940256099942544/1033173712|$REAL_AD_ID|g" {} +
+          find . -type f \( -name "*.xml" -o -name "*.kt" -o -name "*.java" \) -exec sed -i "s|ca-app-pub-3940256099942544/5224354917|$REAL_AD_ID|g" {} +
 
       - name: Create Keystore & Config
         run: |
@@ -41,13 +48,6 @@ jobs:
           find . -type d -name "app" -exec cp debug.keystore {}/debug.keystore \;
           echo '{"project_info":{"project_number":"123","project_id":"ai-studio-project"},"client":[{"client_info":{"mobilesdk_app_id":"1","android_client_info":{"package_name":"com.aistudio.mcassets.bxgvqy"}},"api_key":[{"current_key":"key"}],"services":{"ads_service":{"status":2}}}]}' > google-services.json
           find . -type d -name "app" -exec cp google-services.json {}/google-services.json \;
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: gradle
 
       - name: Build Final APK
         env:
