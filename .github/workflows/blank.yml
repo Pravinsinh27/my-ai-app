@@ -1,4 +1,4 @@
-name: Build APK - Brute Force Icon and Ads
+name: Build APK - Final Pro Fix
 
 on:
   push:
@@ -14,29 +14,33 @@ jobs:
 
       - name: Unzip project
         run: |
-          unzip mc-assets.zip
+          unzip -o mc-assets.zip
+          # If files are inside a folder, move them out
           if [ -d "mc-assets" ]; then mv mc-assets/* .; fi
-
-      - name: Brute Force Logo Replacement
-        run: |
-          # 1. Delete all XML icons (they override PNGs)
-          find . -name "ic_launcher*.xml" -delete
-          
-          # 2. Find every image in the 'res' folder and replace it with your logo
-          # This forces your logo to appear even if the app uses a different name
-          if [ -f "my_logo.png" ]; then
-            find app/src/main/res -name "*.png" -exec cp my_logo.png {} \;
-            find app/src/main/res -name "*.webp" -exec cp my_logo.png {} \;
-          fi
 
       - name: Global Ad ID Replacement (Everywhere)
         run: |
           # YOUR REWARD AD ID
           REAL_ID="ca-app-pub-3303988035586005/9477951640"
           
-          # This searches EVERY file in the project for anything looking like a Google Ad ID
-          # and replaces it with your real one.
+          # This finds ANY Ad ID pattern in ANY file (HTML, JS, XML, Java) 
+          # and replaces it with your real Reward Ad ID.
           find . -type f -exec sed -i -E "s|ca-app-pub-[0-9]{16}/[0-9]{10}|$REAL_ID|g" {} +
+
+      - name: Fix App Icon (Delete Orange Background)
+        run: |
+          # 1. Delete ALL existing launcher icons (XML, PNG, WEBP) to clear the orange background
+          find . -name "ic_launcher*" -delete
+          
+          # 2. Force your 'my_logo.png' into the project with the correct name
+          # We place it in the 'drawable' folder which is a high priority for Android
+          mkdir -p app/src/main/res/drawable
+          cp my_logo.png app/src/main/res/drawable/ic_launcher.png
+          cp my_logo.png app/src/main/res/drawable/ic_launcher_round.png
+          
+          # 3. Update the AndroidManifest to stop looking for XML icons and use our PNG
+          find . -name "AndroidManifest.xml" -exec sed -i 's|android:icon="@mipmap/ic_launcher"|android:icon="@drawable/ic_launcher"|g' {} +
+          find . -name "AndroidManifest.xml" -exec sed -i 's|android:roundIcon="@mipmap/ic_launcher_round"|android:roundIcon="@drawable/ic_launcher_round"|g' {} +
 
       - name: Create Keystore & Config
         run: |
