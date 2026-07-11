@@ -1,4 +1,4 @@
-name: Build APK - Real Ads and Logo
+name: Build APK - Real Ads and Logo (Fixed)
 
 on:
   push:
@@ -19,18 +19,21 @@ jobs:
 
       - name: Replace Ad IDs (Real Ads)
         run: |
-          # REPLACE THE ID BELOW WITH YOUR REAL AD UNIT ID FROM ADMOB
+          # Paste your REAL AD ID below (keep the quote marks)
           REAL_AD_ID="ca-app-pub-3303988035586005/9477951640"
           
-          # This finds the Test Ad ID in any file and replaces it with your Real ID
-          find . -type f \( -name "*.xml" -o -name "*.kt" -o -name "*.java" \) -exec sed -i "s/ca-app-pub-3940256099942544\/6300978111/$REAL_AD_ID/g" {} +
+          # We use '|' as a separator instead of '/' to avoid the error
+          find . -type f \( -name "*.xml" -o -name "*.kt" -o -name "*.java" \) -exec sed -i "s|ca-app-pub-3940256099942544/6300978111|$REAL_AD_ID|g" {} +
 
       - name: Replace App Logo
         run: |
-          # This takes your uploaded 'my_logo.png' and forces it to be the app icon
-          # We overwrite all sizes (hdpi, xhdpi, etc.) with your logo
-          find app/src/main/res -name "ic_launcher.png" -exec cp my_logo.png {} \;
-          find app/src/main/res -name "ic_launcher_round.png" -exec cp my_logo.png {} \;
+          # Ensure you uploaded 'my_logo.png' to your GitHub repo
+          if [ -f "my_logo.png" ]; then
+            find app/src/main/res -name "ic_launcher.png" -exec cp my_logo.png {} \;
+            find app/src/main/res -name "ic_launcher_round.png" -exec cp my_logo.png {} \;
+          else
+            echo "Logo file not found, skipping logo replacement"
+          fi
 
       - name: Create Keystore & Config
         run: |
