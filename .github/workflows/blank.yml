@@ -1,0 +1,44 @@
+name: Unzip and Build APK
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Unzip project files
+        run: |
+          unzip mc-assets.zip
+          # This moves files out if they are inside a subfolder after unzipping
+          if [ -d "mc-assets" ]; then mv mc-assets/* .; fi 
+
+      - name: set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew || true
+
+      - name: Build with Gradle
+        # If gradlew doesn't exist, this uses the pre-installed gradle
+        run: |
+          if [ -f "gradlew" ]; then
+            ./gradlew assembleDebug
+          else
+            gradle assembleDebug
+          fi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-app-apk
+          path: "**/*.apk"
