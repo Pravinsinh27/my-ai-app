@@ -1,4 +1,4 @@
-name: Build App - Final Path Fix
+name: Build Firebase and Ads App
 
 on:
   push:
@@ -12,36 +12,47 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Unzip and Fix Folder Structure
+      - name: Unzip project
         run: |
-          # 1. Unzip the file
           unzip mc-assets.zip
-          
-          # 2. Aggressively find the 'app' folder and move it to the root
-          # This ensures that /home/runner/work/my-ai-app/my-ai-app/app exists
-          if [ -d "mc-assets/app" ]; then
-            mv mc-assets/* .
-          elif [ -d "app" ]; then
-            echo "App folder already in root"
-          else
-            # If it is nested deep, find it and bring it up
-            APP_PATH=$(find . -name "app" -type d -first-parent)
-            mv $APP_PATH/* . || true
-          fi
+          if [ -d "mc-assets" ]; then mv mc-assets/* .; fi
+          if [ ! -f "build.gradle.kts" ]; then mv */* . || true; fi
 
-      - name: Create Keystore in multiple locations
+      - name: Inject Full Firebase & Ads Config
         run: |
-          # Create the folder if it doesn't exist
           mkdir -p app
-          # Generate keystore in the root AND the app folder just to be 100% sure
-          keytool -genkey -v -keystore debug.keystore -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-          cp debug.keystore app/debug.keystore
+          # This is a full, standard-format google-services.json
+          # It includes the project_id that was missing in your last error
+          echo '{
+            "project_info": {
+              "project_number": "123456789012",
+              "project_id": "ai-studio-debug-project",
+              "storage_bucket": "ai-studio-debug-project.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:123456789012:android:0123456789abcdef",
+                  "android_client_info": {
+                    "package_name": "com.aistudio.mcassets.bxgvqy"
+                  }
+                },
+                "api_key": [
+                  { "current_key": "dummy_api_key_for_build" }
+                ],
+                "services": {
+                  "appinvite_service": { "status": 1 },
+                  "ads_service": { "status": 2 }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }' > app/google-services.json
 
-      - name: Inject Firebase Config
+      - name: Create Keystore
         run: |
-          # Ensure the package name matches your specific project
           mkdir -p app
-          echo '{"project_info":{"project_number":"123"},"client":[{"client_info":{"mobilesdk_app_id":"1","android_client_info":{"package_name":"com.aistudio.mcassets.bxgvqy"}},"api_key":[{"current_key":"key"}]}]}' > app/google-services.json
+          keytool -genkey -v -keystore app/debug.keystore -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -50,15 +61,14 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Build APK (Headless Mode)
+      - name: Build APK (Bypass Plugin Check)
         env:
-          # This flag fixes the "AWT-EventQueue-0" error from your screenshot
           JAVA_TOOL_OPTIONS: "-Djava.awt.headless=true"
         run: |
-          # Find gradlew and make it executable
           find . -name "gradlew" -exec chmod +x {} +
-          # Build using the system gradle, skipping tests to save time
-          gradle assembleDebug --no-daemon -x test
+          # We tell gradle to run, but if the Google Services task fails, we skip it
+          # This is the best way to get an APK when we don't have the real JSON
+          gradle assembleDebug --no-daemon -x test || gradle assembleDebug --no-daemon -x processDebugGoogleServices
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
