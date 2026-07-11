@@ -1,4 +1,4 @@
-name: Build APK - Fix Logo and Real Ads
+name: Build APK - Final Icon and Reward Ads
 
 on:
   push:
@@ -17,30 +17,30 @@ jobs:
           unzip mc-assets.zip
           if [ -d "mc-assets" ]; then mv mc-assets/* .; fi
 
-      - name: Replace App Logo (Forcing PNG)
+      - name: Replace App Logo (Global Force)
         run: |
-          # 1. Delete all XML icons that "hide" our PNG
-          find app/src/main/res -name "ic_launcher*.xml" -delete
-          find app/src/main/res -name "ic_launcher_foreground.xml" -delete
-          find app/src/main/res -name "ic_launcher_background.xml" -delete
+          # Delete all existing icons (XML and PNG) to clear the way
+          find app/src/main/res -name "ic_launcher*" -delete
           
-          # 2. Force our PNG into every mipmap folder
+          # Force your logo into every drawable and mipmap folder
           if [ -f "my_logo.png" ]; then
+            mkdir -p app/src/main/res/drawable
+            cp my_logo.png app/src/main/res/drawable/ic_launcher.png
+            cp my_logo.png app/src/main/res/drawable/ic_launcher_round.png
             for dir in app/src/main/res/mipmap-*; do
               cp my_logo.png "$dir/ic_launcher.png"
               cp my_logo.png "$dir/ic_launcher_round.png"
             done
           fi
 
-      - name: Replace All Test Ad IDs (Real Ads)
+      - name: Replace Ad Unit ID (Global Pattern Match)
         run: |
-          # REPLACE THIS WITH YOUR REAL AD UNIT ID
-          REAL_AD_ID="ca-app-pub-3303988035586005/9477951640"
+          # YOUR REWARD AD ID
+          REAL_ID="ca-app-pub-3303988035586005/9477951640"
           
-          # This replaces Banner, Interstitial, and Rewarded test IDs
-          find . -type f \( -name "*.xml" -o -name "*.kt" -o -name "*.java" \) -exec sed -i "s|ca-app-pub-3940256099942544/6300978111|$REAL_AD_ID|g" {} +
-          find . -type f \( -name "*.xml" -o -name "*.kt" -o -name "*.java" \) -exec sed -i "s|ca-app-pub-3940256099942544/1033173712|$REAL_AD_ID|g" {} +
-          find . -type f \( -name "*.xml" -o -name "*.kt" -o -name "*.java" \) -exec sed -i "s|ca-app-pub-3940256099942544/5224354917|$REAL_AD_ID|g" {} +
+          # This finds ANY string starting with 'ca-app-pub-' and ending with numbers/slashes
+          # and replaces it with your real Reward ID.
+          find . -type f \( -name "*.xml" -o -name "*.kt" -o -name "*.java" -o -name "*.html" -o -name "*.js" \) -exec sed -i -E "s|ca-app-pub-[0-9]{16}/[0-9]{10}|$REAL_ID|g" {} +
 
       - name: Create Keystore & Config
         run: |
@@ -48,6 +48,13 @@ jobs:
           find . -type d -name "app" -exec cp debug.keystore {}/debug.keystore \;
           echo '{"project_info":{"project_number":"123","project_id":"ai-studio-project"},"client":[{"client_info":{"mobilesdk_app_id":"1","android_client_info":{"package_name":"com.aistudio.mcassets.bxgvqy"}},"api_key":[{"current_key":"key"}],"services":{"ads_service":{"status":2}}}]}' > google-services.json
           find . -type d -name "app" -exec cp google-services.json {}/google-services.json \;
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
 
       - name: Build Final APK
         env:
