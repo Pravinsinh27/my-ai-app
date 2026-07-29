@@ -3,71 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mc Assets | Render Studios</title>
+    <title>Mc Assets | Official Developer Site - Render Studios</title>
     <style>
-        :root { --primary: #388E3C; --bg: #0f0f0f; --card: #1a1a1a; --text: #ffffff; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; text-align: center; }
-        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
-        .logo { width: 100px; border-radius: 20px; margin-top: 30px; }
-        h1 { margin: 10px 0; }
+        :root {
+            --primary: #388E3C;
+            --bg: #0f0f0f;
+            --card: #1a1a1a;
+            --text: #ffffff;
+            --gray: #a0a0a0;
+        }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            line-height: 1.6;
+        }
+        .navbar {
+            padding: 20px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            justify-content: center;
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .hero {
+            text-align: center;
+            padding: 60px 0;
+        }
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            margin-bottom: 24px;
+        }
+        h1 { font-size: 2.5em; margin: 0; letter-spacing: -1px; }
+        .tagline { color: var(--gray); font-size: 1.1em; margin-top: 10px; }
+
+        .download-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 40px 0;
+        }
+        .btn {
+            padding: 18px 30px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1em;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .btn-amazon {
+            background-color: #ff9900;
+            color: #000;
+            border: none;
+        }
+        .btn-amazon:hover { background-color: #ffb84d; }
         
-        .download-box { margin: 30px 0; display: flex; flex-direction: column; gap: 15px; }
-        .btn { padding: 18px; border-radius: 12px; text-decoration: none; font-weight: bold; transition: 0.2s; }
-        .btn-amazon { background: #ff9900; color: black; }
-        .btn-direct { background: var(--primary); color: white; }
-
-        /* SCREENSHOT GALLERY */
-        .gallery-title { margin-top: 40px; color: var(--primary); font-size: 1.2em; font-weight: bold; }
-        .gallery { 
-            display: flex; 
-            overflow-x: auto; 
-            gap: 15px; 
-            padding: 20px 0;
-            scrollbar-width: none; /* Hide scrollbar for clean look */
-        }
-        .gallery::-webkit-scrollbar { display: none; }
-        .gallery img { 
-            height: 350px; 
-            border-radius: 15px; 
-            border: 2px solid #333; 
-            flex-shrink: 0;
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #333;
+            color: var(--gray);
+            font-size: 0.9em;
         }
 
-        .legal { text-align: left; background: #151515; padding: 20px; border-radius: 15px; font-size: 0.8em; color: #888; margin-top: 40px; }
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 50px;
+        }
+        .f-card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #222;
+        }
+        .f-card h3 { color: var(--primary); margin-top: 0; }
+
+        .legal-section {
+            margin-top: 80px;
+            padding: 30px;
+            background: #151515;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: var(--gray);
+            text-align: left;
+        }
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid #222;
+            font-size: 0.8em;
+            color: #444;
+        }
         a { color: var(--primary); text-decoration: none; }
     </style>
 </head>
 <body>
 
+    <div class="navbar">
+        <div style="font-weight: bold; letter-spacing: 2px;">RENDER STUDIOS</div>
+    </div>
+
     <div class="container">
-        <img src="my_logo.png" alt="Logo" class="logo">
-        <h1>Mc Assets</h1>
-        <p style="color: #888;">Professional 3D Minecraft Models & Maps</p>
-
-        <div class="download-box">
-            <!-- AMAZON LINK -->
-            <a href="https://www.amazon.com/gp/product/B0HBXQW2JB" class="btn btn-amazon">Get it on Amazon Appstore</a>
+        <div class="hero">
+            <img src="my_logo.png" alt="Mc Assets" class="logo">
+            <h1>Mc Assets</h1>
+            <p class="tagline">The Official Pro Utility for Minecraft Content Creators</p>
             
-            <!-- DIRECT DOWNLOAD (FIXED: Ensure it starts with https://) -->
-            <a href="https://drive.google.com/file/d/1eLBRgg4H8hiWtGZmAAD1VTr4vKOAE3RJ/view?usp=drivesdk" class="btn btn-direct">Direct APK Download (v1.0.1)</a>
+            <div class="download-section">
+                <!-- PRIMARY BUTTON FOR ADMOB -->
+                <a href="https://www.amazon.com/gp/product/B0HBXQW2JB" class="btn btn-amazon">Available on Amazon Appstore</a>
+                
+                <!-- SECONDARY FOR YOUR FANS -->
+                <a href="https://drive.google.com/file/d/1eLBRgg4H8hiWtGZmAAD1VTr4vKOAE3RJ/view?usp=drivesdk" class="btn btn-outline">Download Direct APK (v1.0.1)</a>
+            </div>
         </div>
 
-        <!-- SCREENSHOT SECTION -->
-        <div class="gallery-title">App Screenshots</div>
-        <div class="gallery">
-            <img src="shot1.png" alt="Screenshot 1">
-            <img src="shot2.png" alt="Screenshot 2">
-            <img src="shot3.png" alt="Screenshot 3">
+        <div class="features">
+            <div class="f-card">
+                <h3>3D Visualization</h3>
+                <p>Interactive 3D previews for .obj and .fbx models before you download.</p>
+            </div>
+            <div class="f-card">
+                <h3>Premium Maps</h3>
+                <p>Curated Minecraft survival and creative maps optimized for performance.</p>
+            </div>
         </div>
 
-        <div class="legal">
-            <h3>Privacy Policy</h3>
-            <p>Mc Assets by Render Studios does not collect personal user data. We use Google AdMob for ads. All downloads are stored locally. For support, contact pravinsinh182@gmail.com.</p>
-            <hr style="border:0; border-top:1px solid #333; margin: 15px 0;">
-            <a href="app-ads.txt">Developer Verification (app-ads.txt)</a>
+        <div class="legal-section" id="privacy">
+            <h2>Privacy Policy</h2>
+            <p>Mc Assets ("the App") is developed by Render Studios. We are committed to protecting user privacy.</p>
+            <p><b>Data Collection:</b> We do not collect, store, or process any personal identifiable information (PII). No registration is required to use the app.</p>
+            <p><b>Advertising:</b> We use Google AdMob for monetization. AdMob may collect device identifiers to serve personalized advertisements. For more info, visit Google's Privacy Policy.</p>
+            <p><b>Storage:</b> The app requires storage permission solely to save downloaded assets to your local device.</p>
+            <p><b>Support:</b> pravinsinh182@gmail.com</p>
+            <p style="margin-top:20px;">
+                <a href="app-ads.txt" style="border: 1px solid #333; padding: 5px 10px; border-radius: 5px;">View app-ads.txt</a>
+            </p>
         </div>
 
-        <p style="padding: 40px; font-size: 0.7em; color: #444;">© 2024 Render Studios</p>
+        <footer>
+            <p>© 2024 Render Studios. Minecraft is a trademark of Mojang Synergies AB.</p>
+        </footer>
     </div>
 
 </body>
