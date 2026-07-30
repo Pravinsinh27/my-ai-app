@@ -20,84 +20,110 @@
             line-height: 1.6;
         }
         .navbar {
-            padding: 20px;
+            padding: 15px 20px;
             border-bottom: 1px solid #222;
-            display: flex;
-            justify-content: center;
-            background: rgba(15, 15, 15, 0.8);
-            backdrop-filter: blur(10px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background: #000;
+            font-weight: bold;
+            letter-spacing: 2px;
+            font-size: 0.8em;
+            text-align: center;
         }
         .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 20px;
         }
-        .hero {
-            text-align: center;
-            padding: 60px 0;
+        
+        /* PLAY STORE STYLE HEADER */
+        .app-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+            text-align: left;
         }
         .logo {
-            width: 120px;
-            height: 120px;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            margin-bottom: 24px;
+            width: 85px;
+            height: 85px;
+            border-radius: 18px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
-        h1 { font-size: 2.5em; margin: 0; letter-spacing: -1px; }
-        .tagline { color: var(--gray); font-size: 1.1em; margin-top: 10px; }
+        .app-title-box h1 { 
+            font-size: 1.8em; 
+            margin: 0; 
+            letter-spacing: -0.5px;
+        }
+        .developer-name { 
+            color: var(--primary); 
+            font-weight: 600; 
+            font-size: 0.9em;
+            margin-top: 2px;
+        }
+
+        /* SCREENSHOT GALLERY */
+        .screenshot-gallery {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            margin: 30px 0;
+            padding-bottom: 10px;
+            scrollbar-width: none; /* Hide scrollbar for clean look */
+        }
+        .screenshot-gallery::-webkit-scrollbar { display: none; }
+        .screenshot-gallery img {
+            height: 350px;
+            border-radius: 12px;
+            border: 1px solid #222;
+            flex-shrink: 0;
+        }
 
         .download-section {
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            margin: 40px 0;
+            gap: 12px;
+            margin: 30px 0;
         }
         .btn {
-            padding: 18px 30px;
-            border-radius: 14px;
+            padding: 16px 25px;
+            border-radius: 12px;
             text-decoration: none;
             font-weight: 700;
-            font-size: 1.1em;
+            font-size: 1em;
             text-align: center;
             transition: all 0.2s;
         }
         .btn-amazon {
             background-color: #ff9900;
             color: #000;
-            border: none;
         }
-        .btn-amazon:hover { background-color: #ffb84d; }
-        
         .btn-outline {
             background: transparent;
             border: 1px solid #333;
             color: var(--gray);
-            font-size: 0.9em;
         }
 
         .features {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 50px;
+            gap: 15px;
+            margin-top: 30px;
         }
         .f-card {
             background: var(--card);
-            padding: 20px;
+            padding: 15px;
             border-radius: 15px;
             border: 1px solid #222;
+            text-align: left;
         }
-        .f-card h3 { color: var(--primary); margin-top: 0; }
+        .f-card h3 { color: var(--primary); margin-top: 0; font-size: 1em; }
+        .f-card p { font-size: 0.85em; margin: 0; color: var(--gray); }
 
         .legal-section {
-            margin-top: 80px;
-            padding: 30px;
+            margin-top: 60px;
+            padding: 25px;
             background: #151515;
-            border-radius: 20px;
-            font-size: 0.9em;
+            border-radius: 18px;
+            font-size: 0.85em;
             color: var(--gray);
             text-align: left;
         }
@@ -105,7 +131,7 @@
             text-align: center;
             padding: 40px;
             border-top: 1px solid #222;
-            font-size: 0.8em;
+            font-size: 0.75em;
             color: #444;
         }
         a { color: var(--primary); text-decoration: none; }
@@ -113,42 +139,49 @@
 </head>
 <body>
 
-    <div class="navbar">
-        <div style="font-weight: bold; letter-spacing: 2px;">RENDER STUDIOS</div>
-    </div>
+    <div class="navbar">RENDER STUDIOS</div>
 
     <div class="container">
-        <div class="hero">
+        <!-- HEADER: ICON LEFT, TEXT RIGHT -->
+        <div class="app-header">
             <img src="my_logo.png" alt="Mc Assets" class="logo">
-            <h1>Mc Assets</h1>
-            <p class="tagline">The Official Pro Utility for Minecraft Content Creators</p>
-            
-            <div class="download-section">
-                <!-- PRIMARY BUTTON FOR ADMOB -->
-                <a href="https://www.amazon.com/gp/product/B0HBXQW2JB" class="btn btn-amazon">Available on Amazon Appstore</a>
-                
-                <!-- SECONDARY FOR YOUR FANS -->
-                <a href="https://drive.google.com/file/d/1eLBRgg4H8hiWtGZmAAD1VTr4vKOAE3RJ/view?usp=drivesdk" class="btn btn-outline">Download Direct APK (v1.0.1)</a>
+            <div class="app-title-box">
+                <h1>Mc Assets</h1>
+                <div class="developer-name">Render Studios</div>
+                <div style="font-size: 0.8em; color: #555;">Tools & Utilities</div>
             </div>
+        </div>
+
+        <!-- DOWNLOAD BUTTONS -->
+        <div class="download-section">
+            <a href="https://www.amazon.com/gp/product/B0HBXQW2JB" class="btn btn-amazon">Available on Amazon Appstore</a>
+            <a href="https://drive.google.com/file/d/1eLBRgg4H8hiWtGZmAAD1VTr4vKOAE3RJ/view?usp=drivesdk" class="btn btn-outline">Direct APK Download (v1.0.1)</a>
+        </div>
+
+        <!-- SCREENSHOT GALLERY (SWIPE LEFT/RIGHT) -->
+        <div class="screenshot-gallery">
+            <img src="PASTE_SCREENSHOT_1_LINK_HERE" alt="Preview 1">
+            <img src="PASTE_SCREENSHOT_2_LINK_HERE" alt="Preview 2">
+            <img src="PASTE_SCREENSHOT_3_LINK_HERE" alt="Preview 3">
+            <img src="PASTE_SCREENSHOT_4_LINK_HERE" alt="Preview 4">
         </div>
 
         <div class="features">
             <div class="f-card">
                 <h3>3D Visualization</h3>
-                <p>Interactive 3D previews for .obj and .fbx models before you download.</p>
+                <p>Interactive 3D previews for models before you download.</p>
             </div>
             <div class="f-card">
                 <h3>Premium Maps</h3>
-                <p>Curated Minecraft survival and creative maps optimized for performance.</p>
+                <p>Curated Minecraft survival worlds optimized for play.</p>
             </div>
         </div>
 
         <div class="legal-section" id="privacy">
             <h2>Privacy Policy</h2>
-            <p>Mc Assets ("the App") is developed by Render Studios. We are committed to protecting user privacy.</p>
-            <p><b>Data Collection:</b> We do not collect, store, or process any personal identifiable information (PII). No registration is required to use the app.</p>
-            <p><b>Advertising:</b> We use Google AdMob for monetization. AdMob may collect device identifiers to serve personalized advertisements. For more info, visit Google's Privacy Policy.</p>
-            <p><b>Storage:</b> The app requires storage permission solely to save downloaded assets to your local device.</p>
+            <p>Mc Assets is developed by Render Studios. We are committed to protecting user privacy.</p>
+            <p><b>Data:</b> No personal data is collected or stored.</p>
+            <p><b>Ads:</b> We use Google AdMob for monetization. For more info, visit Google's Privacy Policy.</p>
             <p><b>Support:</b> pravinsinh182@gmail.com</p>
             <p style="margin-top:20px;">
                 <a href="app-ads.txt" style="border: 1px solid #333; padding: 5px 10px; border-radius: 5px;">View app-ads.txt</a>
